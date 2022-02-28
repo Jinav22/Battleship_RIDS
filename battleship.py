@@ -8,7 +8,7 @@ from functools import partial
 from util_for_saving_data import *
 
 TOKEN = os.environ["GITHUB_TOKEN"]
-file_path = "Jinav22/Battleship_Game_RIDS"
+file_path = "Jinav22/Battleship_RIDS"
 file_name = "data.txt"
 
 frames = []
