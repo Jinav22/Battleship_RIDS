@@ -20,7 +20,8 @@ human_ship_pos = []
 bot_ship_pos = []
 moves_h = []
 moves_b = []
-
+hits = []
+strategy = False
 
 class Ship:
     def __init__(self, name, size):
@@ -184,7 +185,7 @@ class Player:
             print(data1)
             update_data, commit_message = update_github_file(repository, file_name, data1)
             print(update_data)
-            push(repository, file_name, commit_message, update_data)
+            #push(repository, file_name, commit_message, update_data)
 
             #repository = github_setup(TOKEN, file_path)
             for i in bot_ship_pos:
@@ -195,7 +196,7 @@ class Player:
             data2 += 'Bot'
 
             data, commit_message = update_github_file(repository, file_name, data2)
-            push(repository, file_name, commit_message, data)
+            #push(repository, file_name, commit_message, data)
 
             if self.playAgain():
                 self.parent.reset()
@@ -219,7 +220,9 @@ class Player:
         self.sunk += 1
         return True
 
-    def move(self, x, y, s):
+    def move(self, x, y, s, p):
+        global strategy
+
         self.board[x][y] = s
         self.valid.pop(self.valid.index([x, y]))
         self.turn += 1
@@ -229,6 +232,10 @@ class Player:
                 self.buttons[x][y].configure(image=self.parent.hit, compound="left")
                 self.status.configure(text=f"{ship.name} was hit!", bg="white", fg="red")
                 foundHit = True
+                if p == "bot":
+                    hits.append([x, y])
+                    strategy = True
+                    strategy = (strategy and not self.isSunk(ship))
                 if self.isSunk(ship):
                     self.shipWasSunkMessages(ship)
                 break
@@ -242,6 +249,93 @@ class Player:
         x = self.valid[random.randint(0, len(self.valid) - 1)]
         moves_b.append(x)
         return x
+
+    def strategic_move(self):
+        # if hits[-1][0] == 0 and hits[-1][1] != 0:
+        #     opt = ["x", "y", "-y"]
+        # elif hits[-1][1] == 0 and hits[-1][0] != 0:
+        #     opt = ["-x", "x", "y"]
+        # elif hits[-1][1] == 0 and hits[-1][0] == 0:
+        #     opt = ["x", "y"]
+        # elif hits[-1][1] == (BOARD_SIZE - 1) and hits[-1][0] == (BOARD_SIZE - 1):
+        #     opt = ["-x", "-y"]
+        # elif hits[-1][1] == (BOARD_SIZE - 1):
+        #     opt = ["-x", "-y", "x"]
+        # elif hits[-1][0] == (BOARD_SIZE - 1):
+        #     opt = ["x", "-y","y"]
+        # else:
+        #     opt = ["-x","x","y","-y"]
+        # xory = random.choice(opt)
+        # if xory == "-x":
+        #     print(xory,moves_b)
+        #     x = hits[-1][0] -1
+        #     y = hits[-1][1]
+        #     if [x, y] not in self.valid:
+        #         xory = random.choice(["x","y","-y"])
+        # if xory == "x":
+        #     print(xory,moves_b)
+        #     x = hits[-1][0] + 1
+        #     y = hits[-1][1]
+        #     if [x, y] not in self.valid:
+        #         xory = random.choice(["y","-y"])
+        # if xory == "-y":
+        #     print(xory,moves_b)
+        #     x = hits[-1][0]
+        #     y = hits[-1][1] - 1
+        #     if [x, y] not in self.valid:
+        #         xory = random.choice(["x","y","-y"])
+        # if xory == "y":
+        #     print(xory,moves_b)
+        #     x = hits[-1][0]
+        #     y = hits[-1][1] + 1
+        #     if [x, y] not in self.valid:
+        #         y -= 2
+        #         if [x, y] not in self.valid:
+        #             y += 1
+        #             x += 1
+        #             if [x, y] not in self.valid:
+        #                 x -= 2
+        #                 if [x,y] not in self.valid:
+        #                     x = moves_b[-1][0] + 1
+
+        x = hits[-1][0] - 1
+        y = hits[-1][1]
+        opt = ["x","-x","y","-y"]
+        valid = [x,y] in self.valid
+        tried = []
+        d = 1
+        while not valid:
+            xory = random.choice(opt)
+            if xory in tried:
+                if len(tried) == len(opt):
+                    tried = []
+                    d = 2
+                continue
+            if xory == "-x":
+                tried.append(xory)
+                print(xory, moves_b)
+                x = hits[-1][0] - d
+                y = hits[-1][1]
+                valid = [x, y] in self.valid
+            if xory == "x":
+                print(xory, moves_b)
+                x = hits[-1][0] + d
+                y = hits[-1][1]
+                valid = [x, y] in self.valid
+            if xory == "-y":
+                print(xory, moves_b)
+                x = hits[-1][0]
+                y = hits[-1][1] - d
+                valid = [x, y] in self.valid
+            if xory == "y":
+                print(xory, moves_b)
+                x = hits[-1][0]
+                y = hits[-1][1] + d
+
+
+        moves_b.append([x, y])
+        return x, y
+
 
     # Returns True if we've placed the last ship, otherwise False
     def donePlacingShips(self, holdi):
@@ -315,14 +409,18 @@ class Game:
 
     # A move was made from our GUI
     def tkmove(self, x, y, root):
+        global strategy
         # print(self.turn, self.player.text, x, y)
         if self.player.checkMove(x, y):
-            self.player.move(x, y, 'X')
+            self.player.move(x, y, 'X',"human")
             if self.status == 'GamePlay':
                 if self.computer.auto:
-                    x, y = self.computer.autoMove()
+                    if strategy:
+                        x, y = self.computer.strategic_move()
+                    else:
+                        x, y = self.computer.autoMove()
                     # if self.player.sunk < 5:
-                    self.computer.move(x, y, 'X')
+                    self.computer.move(x, y, 'X', "bot")
 
     # Called when clicking on the player's board.  This is used to place the player's ships on their board.
     def tkplaceships(self, x, y, root):
