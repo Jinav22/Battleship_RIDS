@@ -317,22 +317,25 @@ class Player:
                 x = hits[-1][0] - d
                 y = hits[-1][1]
                 valid = [x, y] in self.valid
+                continue
             if xory == "x":
                 print(xory, moves_b)
                 x = hits[-1][0] + d
                 y = hits[-1][1]
                 valid = [x, y] in self.valid
+                continue
             if xory == "-y":
                 print(xory, moves_b)
                 x = hits[-1][0]
                 y = hits[-1][1] - d
                 valid = [x, y] in self.valid
+                continue
             if xory == "y":
                 print(xory, moves_b)
                 x = hits[-1][0]
                 y = hits[-1][1] + d
-
-
+                valid = [x, y] in self.valid
+                continue
         moves_b.append([x, y])
         return x, y
 
