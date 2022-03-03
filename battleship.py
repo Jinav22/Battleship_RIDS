@@ -7,7 +7,7 @@ from tkinter import messagebox
 from functools import partial
 from util_for_saving_data import *
 
-TOKEN = os.environ["GITHUB_TOKEN"]
+TOKEN = os.environ['GITHUB_TOKEN']
 file_path = "Jinav22/Battleship_RIDS"
 file_name = "data.txt"
 
@@ -39,9 +39,9 @@ class Player:
         self.auto = auto
         self.label = None
         self.status = None
-        self.wins = 0
-        self.losses = 0
-        self.ties = 0
+        # self.wins = 0
+        # self.losses = 0
+        # self.ties = 0
         self.reset()
 
     def reset(self):
@@ -121,19 +121,18 @@ class Player:
                     if found:
                         break
                     j += 1
-            print(f"{ship.name} is in {ship.position}")
+            # print(f"{ship.name} is in {ship.position}")
             bot_ship_pos.append(list(ship.position.keys()))
         self.printBoard()
 
     def printBoard(self):
         for i in range(BOARD_SIZE):
-            print(self.board[i])
-            #pass
+            #print(self.board[i])
+            pass
 
     # Check our list of valid remaining moves to see if the move is valid
     def checkMove(self, x, y):
         if [x, y] in self.valid:
-            moves_h.append([x, y])
             return True
         return False
 
@@ -173,7 +172,7 @@ class Player:
         global data1
         global data2
 
-        print(f"{ship.name} was sunk!!")
+        #print(f"{ship.name} was sunk!!")
         if self.sunk == 5:
             repository = github_setup(TOKEN, file_path)
             for i in human_ship_pos:
@@ -182,10 +181,9 @@ class Player:
             data1 += ('\"' + ','.join([str(i) for i in moves_h]) + '\"' + ',')
             data1 += 'Human'
 
-            print(data1)
+            #print(data1)
             update_data, commit_message = update_github_file(repository, file_name, data1)
-            print(update_data)
-            push(repository, file_name, commit_message, update_data)
+            #push(repository, file_name, commit_message, update_data)
 
             repository = github_setup(TOKEN, file_path)
             for i in bot_ship_pos:
@@ -196,7 +194,9 @@ class Player:
             data2 += 'Bot'
 
             data, commit_message = update_github_file(repository, file_name, data2)
-            push(repository, file_name, commit_message, data)
+            #push(repository, file_name, commit_message, data)
+
+            print(update_data, data)
 
             if self.playAgain():
                 self.parent.reset()
@@ -238,8 +238,18 @@ class Player:
                     strategy = (strategy and not self.isSunk(ship))
                 if self.isSunk(ship):
                     self.shipWasSunkMessages(ship)
+                if foundHit and p == "bot":
+                    moves_b.append([x, y, ship.name])
+                if foundHit and p == "human":
+                    moves_h.append([x, y, ship.name])
                 break
+
         if not foundHit:
+            if p == "bot":
+                moves_b.append([x, y, '-'])
+            if p == "human":
+                moves_h.append([x, y, '-'])
+
             self.buttons[x][y].configure(image=self.parent.miss, compound="left")
             self.status.configure(text=f"Miss.", bg="white", fg="blue")
         # print(self.board)
@@ -247,7 +257,7 @@ class Player:
     # The computer's moves are random right now.  Some intelligence in the future would be nice.
     def autoMove(self):
         x = self.valid[random.randint(0, len(self.valid) - 1)]
-        moves_b.append(x)
+        #moves_b.append(x)
         return x
 
     def strategic_move(self):
@@ -314,33 +324,33 @@ class Player:
                 continue
             if xory == "-x":
                 tried.append(xory)
-                print(xory, moves_b)
+                # print(xory, moves_b)
                 x = hits[-1][0] - d
                 y = hits[-1][1]
                 valid = [x, y] in self.valid
                 continue
             if xory == "x":
                 tried.append(xory)
-                print(xory, moves_b)
+                # print(xory, moves_b)
                 x = hits[-1][0] + d
                 y = hits[-1][1]
                 valid = [x, y] in self.valid
                 continue
             if xory == "-y":
                 tried.append(xory)
-                print(xory, moves_b)
+                # print(xory, moves_b)
                 x = hits[-1][0]
                 y = hits[-1][1] - d
                 valid = [x, y] in self.valid
                 continue
             if xory == "y":
                 tried.append(xory)
-                print(xory, moves_b)
+                # print(xory, moves_b)
                 x = hits[-1][0]
                 y = hits[-1][1] + d
                 valid = [x, y] in self.valid
                 continue
-        moves_b.append([x, y])
+        #moves_b.append([x, y])
         return x, y
 
 
@@ -367,6 +377,7 @@ class Player:
         found = False
         holdi = -1
         for i, ship in enumerate(self.ships):
+            self.status.configure(text=f"{ship.name} {ship.size} tiles", bg="white", fg="blue")
             if len(ship.position) < ship.size:
                 if len(ship.position) == 0:
                     found = True
