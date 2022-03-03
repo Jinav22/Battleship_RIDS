@@ -185,9 +185,9 @@ class Player:
             print(data1)
             update_data, commit_message = update_github_file(repository, file_name, data1)
             print(update_data)
-            #push(repository, file_name, commit_message, update_data)
+            push(repository, file_name, commit_message, update_data)
 
-            #repository = github_setup(TOKEN, file_path)
+            repository = github_setup(TOKEN, file_path)
             for i in bot_ship_pos:
                 data2 += '\"' + ','.join([str(j) for j in i]) + '\"' + ','
 
@@ -196,7 +196,7 @@ class Player:
             data2 += 'Bot'
 
             data, commit_message = update_github_file(repository, file_name, data2)
-            #push(repository, file_name, commit_message, data)
+            push(repository, file_name, commit_message, data)
 
             if self.playAgain():
                 self.parent.reset()
@@ -304,12 +304,13 @@ class Player:
         valid = [x,y] in self.valid
         tried = []
         d = 1
+        a = -1
         while not valid:
             xory = random.choice(opt)
             if xory in tried:
                 if len(tried) == len(opt):
                     tried = []
-                    d = 2
+                    d += 1
                 continue
             if xory == "-x":
                 tried.append(xory)
@@ -319,18 +320,21 @@ class Player:
                 valid = [x, y] in self.valid
                 continue
             if xory == "x":
+                tried.append(xory)
                 print(xory, moves_b)
                 x = hits[-1][0] + d
                 y = hits[-1][1]
                 valid = [x, y] in self.valid
                 continue
             if xory == "-y":
+                tried.append(xory)
                 print(xory, moves_b)
                 x = hits[-1][0]
                 y = hits[-1][1] - d
                 valid = [x, y] in self.valid
                 continue
             if xory == "y":
+                tried.append(xory)
                 print(xory, moves_b)
                 x = hits[-1][0]
                 y = hits[-1][1] + d
