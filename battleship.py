@@ -206,6 +206,7 @@ class Player:
                 root.destroy()
         else:
             self.status.configure(text=f"{ship.name} was sunk!", bg="white", fg="red")
+            self.status2.configure(text=f"Ships intact: {5-self.sunk}", fg="blue", bg="white")
         return True
 
     # Returns False if the ship was already sunk or if unhit sections of the ship remain
@@ -463,6 +464,17 @@ def startBoard(game, root):
     frames += [Frame(root, bg="blue")]
     frames[-1].pack_propagate(False)
     frames[-1].grid(sticky="n")
+    # game.computer.boardInit()
+
+    frames += [Frame(root,  bg="blue", height=70, width=232)]
+    frames[-1].pack_propagate(False)
+    game.computer.status2 = Label(frames[-1], text="Ships intact: 5", fg="blue", bg="white", font="Verdana 16",
+                                 anchor="center", justify="center")
+    game.computer.status2.pack()
+    frames[-1].grid(column=0, row=1, sticky="n")
+    frames += [Frame(root, bg="blue")]
+    frames[-1].pack_propagate(False)
+    frames[-1].grid(sticky="n")
     game.computer.boardInit()
     return
 
@@ -483,6 +495,18 @@ def completeBoard(game,  root):
     frames += [Frame(root, bg="blue")]
     frames[-1].pack_propagate(False)
     frames[-1].grid(column=2, row=1, sticky="n")
+
+    frames += [Frame(root,  bg="blue", height=70, width=232)]
+    frames[-1].pack_propagate(False)
+    game.player.status2 = Label(frames[-1], text="Ships intact: 5", fg="blue", bg="white", font="Verdana 16",
+                                 anchor="center", justify="center")
+    game.player.status2.pack()
+    frames[-1].grid(column=2, row=1, sticky="n")
+    frames += [Frame(root, bg="blue")]
+    frames[-1].pack_propagate(False)
+    frames[-1].grid(sticky="n")
+
+    frames[-1].grid(column=2, row=2, sticky="n")
     game.player.boardInit()
     game.player.initShipPositions()
     return
