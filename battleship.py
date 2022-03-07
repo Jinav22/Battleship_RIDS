@@ -233,11 +233,13 @@ class Player:
                 self.buttons[x][y].configure(image=self.parent.hit, compound="left")
                 self.status.configure(text=f"{ship.name} was hit!", bg="white", fg="red")
                 foundHit = True
+                SUNK = self.isSunk(ship)
                 if p == "bot":
                     hits.append([x, y])
                     strategy = True
-                    strategy = (strategy and not self.isSunk(ship))
-                if self.isSunk(ship):
+                    strategy = (strategy and not SUNK)
+                #print(ship, self.isSunk(ship))
+                if SUNK:
                     self.shipWasSunkMessages(ship)
                 if foundHit and p == "bot":
                     moves_b.append([x, y, ship.name])
